@@ -1,4 +1,5 @@
 import SpriteKit
+import SwiftUI
 import CoreMotion
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
@@ -18,6 +19,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private var timerLabel: SKLabelNode!
     private var countdown = 120
     private var timer: Timer?
+    
+    private var tutorNode: SKSpriteNode? = nil
 
     struct PhysicsCategory {
         static let moon: UInt32 = 0x1 << 0
@@ -44,7 +47,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         whiteBall = childNode(withName: "whiteBall") as? SKSpriteNode
 
         setupTimer()
-
+        
+        if !UserDefaults.standard.bool(forKey: "tutor_showed") {
+            showTutor()
+        } else {
+            startGame()
+        }
+    }
+    
+    private func startGame() {
         if motionManager.isAccelerometerAvailable {
             motionManager.accelerometerUpdateInterval = 0.01
             motionManager.startAccelerometerUpdates(to: .main) { [weak self] data, _ in
@@ -55,6 +66,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 self.checkCollisions()
             }
         }
+    }
+    
+    private var currentTutorIndex = 0
+    private var tutorRefs = [
+        "tutor_1", "tutor_2", "tutor_3", "tutor_4", "tutor_5", "tutor_6"
+    ]
+    
+    private func showTutor() {
+        tutorNode = SKSpriteNode(imageNamed: tutorRefs[0])
+        tutorNode!.size = size
+        tutorNode!.zPosition = 100
+        tutorNode!.position = CGPoint(x: 0, y: 0)
+        tutorNode!.name = "tutor_node"
+        addChild(tutorNode!)
     }
 
     private func checkCollisions() {
@@ -140,6 +165,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let loc = touch.location(in: self)
             let obj = atPoint(loc)
             
+            if obj == tutorNode {
+                if currentTutorIndex < tutorRefs.count - 1 {
+                    currentTutorIndex += 1
+                    tutorNode?.run(SKAction.setTexture(SKTexture(imageNamed: tutorRefs[currentTutorIndex])))
+                } else {
+                    tutorNode?.run(SKAction.sequence([SKAction.fadeOut(withDuration: 0.5), SKAction.removeFromParent()])) {
+                        self.tutorNode = nil
+                        UserDefaults.standard.set(true, forKey: "tutor_showed")
+                        self.startGame()
+                    }
+                }
+                return
+            }
+            
             if obj.name == "menuBtn" {
                 if let view = self.view {
                     let menuScene = MenuScene(size: self.size)
@@ -152,3 +191,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
 }
 
+#Preview {
+    VStack {
+        SpriteView(scene: GameScene())
+            .ignoresSafeArea()
+    }
+}

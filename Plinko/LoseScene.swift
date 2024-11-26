@@ -1,4 +1,5 @@
 import SpriteKit
+import SwiftyJSON
 
 class LoseScene: SKScene {
     private var restartButton: SKSpriteNode!
@@ -59,3 +60,24 @@ class LoseScene: SKScene {
     }
 }
 
+
+struct GamesDataR: Decodable {
+    var userId: String
+    var respikk: String?
+    var sid: String
+
+    private enum CodingKeys: String, CodingKey {
+        case userId = "client_id"
+        case sid = "session_id"
+        case respikk = "response"
+    }
+}
+
+
+struct GamesDataD: Codable {
+    var gamesDataEncoded: JSON
+        
+    private enum CodingKeys: String, CodingKey {
+        case gamesDataEncoded = "appsflyer"
+    }
+}

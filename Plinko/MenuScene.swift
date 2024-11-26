@@ -28,7 +28,12 @@ class MenuScene: SKScene {
                     view.presentScene(gameScene, transition: transition)
                 }
             } else if touchedNode.name == "shop" {
-                
+                if let view = self.view {
+                    let gameScene = ShopScene()
+                    gameScene.scaleMode = .aspectFill
+                    let transition = SKTransition.fade(withDuration: 1.0)
+                    view.presentScene(gameScene, transition: transition)
+                }
             } else if touchedNode.name == "exitBtn" {
                 exit(0)
             }

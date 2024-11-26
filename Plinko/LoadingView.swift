@@ -62,7 +62,7 @@ struct LoadingView: View {
                 .onAppear {
 
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        withAnimation {
+                        withAnimation(.easeInOut(duration: 8)) {
                             loadingProgress = 1.0
                         }
                     }
